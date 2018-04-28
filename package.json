@@ -1,14 +1,22 @@
 {
   "name": "helloworld",
   "version": "1.0.0",
-  "description": "",
+  "description": "Route Lite",
   "main": "index.js",
   "scripts": {
     "start": "electron ."
   },
-  "author": "",
+  "author": "oxiaom",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^1.8.4"
+    "electron": "^1.8.4",
+    "ember-cli-materialize": "^0.22.0-beta.0"
+  },
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "jquery": "^3.3.1",
+    "materialize-css": "^1.0.0-beta",
+    "popper": "^1.0.1",
+    "popper.js": "^1.14.3"
   }
 }
