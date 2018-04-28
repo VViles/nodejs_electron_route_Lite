@@ -15,6 +15,7 @@
   "dependencies": {
     "bootstrap": "^3.3.7",
     "jquery": "^3.3.1",
+    "jsdom": "^11.9.0",
     "materialize-css": "^1.0.0-beta",
     "popper": "^1.0.1",
     "popper.js": "^1.14.3"
