@@ -38,8 +38,13 @@ const ipcRenderer =  electron.ipcRenderer;
                     }
             }
             console.error(reason, 'uncaughtException at Promise' );    
-        })       
+        });
+        ipc.on("Go__c",function(v1,v2){
+            console.log(v1);   
+             
+        });       
     });
+    
     function flush_devinfo_func(){
         console.log("flush_devinfo_func _ here");
         var client = new net.Socket();

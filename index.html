@@ -23,7 +23,7 @@
     </div>
 
     <div class="container center">
-        <a class="waves-effect  waves-light btn"><i class="material-icons right">&#xE8D5;</i> <span>Start</span> </a><a id="id_flash_devices" class="waves-effect waves-teal btn-flat"><i class="material-icons">autorenew</i></a> <br>
+        <a  id="Start_PW" class="waves-effect  waves-light btn"><i class="material-icons right">&#xE8D5;</i> <span>Start</span> </a><a id="id_flash_devices" class="waves-effect waves-teal btn-flat"><i class="material-icons">autorenew</i></a> <br>
         <label id="info6003" class="red-text text-darken-2"></label>
     </div>
 <div class="container">
@@ -46,6 +46,40 @@
     id_flash_duankou.addEventListener("click",id_flash_duankou_click);
     var id_flash_devices = document.getElementById("id_flash_devices");
     id_flash_devices.addEventListener("click",id_flash_devices_click);
+    var Start_PW = document.getElementById("Start_PW");
+    Start_PW.addEventListener("click",Start_PW_click);
+    function Start_PW_click(){
+        
+        var port = 0;
+        var list_sn={'List':[]};
+        var sl  =  document.getElementById("Sound_source_");
+        if( sl.value !="" ){
+            port = sl.value;    
+        }else{
+            alert("Sound source needs to be selected~!");
+            return;
+        }
+        var sl  =  document.getElementsByClassName("devlist");
+        if(sl.length > 0 ){
+                for( var i=0 ; i < sl.length ; i++ ){
+                        if(sl[i].checked == true ){
+                            list_sn.List.push(sl[i].getAttribute("sn")); 
+                        }                      
+                }
+                
+                if(list_sn.List.length > 0){
+                    ipc.send("Go__c",port,list_sn);    
+                }else{
+                    alert("Need to choose playback device~!");
+                    return;
+                }
+                 
+        }else{
+            alert("Need to choose playback device~!");
+            return;
+        }
+    }
+
     function id_flash_duankou_click(){
         ipc.send("flush_portinfo");
         document.querySelector("#info4999").innerHTML="";
@@ -74,7 +108,6 @@
        var dev_list_id = document.querySelector("#dev_list_id");
        dev_list_id.innerHTML = "";        
     });
-
     ipcRenderer.on("adddevice_node",function(e,v1,v2,v3){
         document.querySelector("#dev_list_id").innerHTML += ("<p><label><input class='devlist' sn='"+v1+"' type=\"checkbox\"/><span>"+v1+"  status:"+v2+ "  IP: " + v3 +"</span></label></p>");
         M.AutoInit();
