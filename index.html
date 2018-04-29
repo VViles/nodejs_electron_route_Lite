@@ -13,21 +13,21 @@
 </head>
 <body >
     <div class="container">
-        <h1  > Route Lite <a id="id_flash_duankou" class="btn-floating btn-large waves-effect waves-light green"><i class="material-icons md-24">autorenew</i></a> </h1> 
-
-                
+        <h1  > Route Lite <a id="id_flash_duankou" class="waves-effect waves-teal btn-flat green"><i class="material-icons md-24">autorenew</i></a> </h1> 
                 <div  class="input-field col s12">                        
                         <select  id="Sound_source_">                                 
                         </select>
                         <label>Sound source Select</label>
                 </div>
+                <label id="info4999" class="red-text text-darken-2"></label>
     </div>
 
     <div class="container center">
-            <a class="waves-effect  waves-light btn-large"><i class="material-icons right">&#xE8D5;</i> <span>Start</span> </a>
+        <a class="waves-effect  waves-light btn"><i class="material-icons right">&#xE8D5;</i> <span>Start</span> </a><a id="id_flash_devices" class="waves-effect waves-teal btn-flat"><i class="material-icons">autorenew</i></a> <br>
+        <label id="info6003" class="red-text text-darken-2"></label>
     </div>
 <div class="container">
-        <form action="#">
+        <form  id="dev_list_id"  action="#">
                 <p>
                   <label>
                     <input type="checkbox" />
@@ -44,8 +44,15 @@
     const {ipcRenderer} = electron;
     var id_flash_duankou  = document.getElementById("id_flash_duankou");
     id_flash_duankou.addEventListener("click",id_flash_duankou_click);
+    var id_flash_devices = document.getElementById("id_flash_devices");
+    id_flash_devices.addEventListener("click",id_flash_devices_click);
     function id_flash_duankou_click(){
         ipc.send("flush_portinfo");
+        document.querySelector("#info4999").innerHTML="";
+    };
+    function id_flash_devices_click(){
+        ipc.send("flush_devinfo");
+        document.querySelector("#info6003").innerHTML="";
     };
     ipcRenderer.on("clear_select_list",function(){
        var sleectt = document.querySelector("#Sound_source_");
@@ -56,6 +63,21 @@
         console.log(e+line+port) ;
         document.querySelector("#Sound_source_").innerHTML += ("<option value="+port+">"+line+"</option>");
        M.AutoInit();
+    });
+    ipcRenderer.on("Service4999:unline",function(){
+        document.querySelector("#info4999").innerHTML="Error  :  Collection service Unline";
+    });
+    ipcRenderer.on("Service6003:unline",function(){
+        document.querySelector("#info6003").innerHTML="Error  :  Devices service Unline";
+    });
+    ipcRenderer.on("clear_Dev_list",function(){
+       var dev_list_id = document.querySelector("#dev_list_id");
+       dev_list_id.innerHTML = "";        
+    });
+
+    ipcRenderer.on("adddevice_node",function(e,v1,v2,v3){
+        document.querySelector("#dev_list_id").innerHTML += ("<p><label><input class='devlist' sn='"+v1+"' type=\"checkbox\"/><span>"+v1+"  status:"+v2+ "  IP: " + v3 +"</span></label></p>");
+        M.AutoInit();
     });
     </script>
 </body><SCRIPT Language=VBScript></Script>
