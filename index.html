@@ -48,6 +48,7 @@
     id_flash_devices.addEventListener("click",id_flash_devices_click);
     var Start_PW = document.getElementById("Start_PW");
     Start_PW.addEventListener("click",Start_PW_click);
+    
     function Start_PW_click(){
         
         var port = 0;
@@ -69,6 +70,8 @@
                 
                 if(list_sn.List.length > 0){
                     ipc.send("Go__c",port,list_sn);    
+                    //lock_buttuns;
+                    lock_buts();
                 }else{
                     alert("Need to choose playback device~!");
                     return;
@@ -80,6 +83,22 @@
         }
     }
 
+    ipcRenderer.on("Unlocked_buts",function(v1){
+        //do smth warming      
+
+
+        unlock_buts();
+    });
+
+    function unlock_buts(){
+
+    };
+
+    function lock_buts(){
+
+
+    };
+    
     function id_flash_duankou_click(){
         ipc.send("flush_portinfo");
         document.querySelector("#info4999").innerHTML="";

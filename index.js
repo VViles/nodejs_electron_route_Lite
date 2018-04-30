@@ -1,6 +1,8 @@
  
 
 const electron = require('electron');
+var dgram = require('dgram');
+
 //var $ = require('./node_modules/jquery/dist/jquery');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
@@ -11,9 +13,11 @@ var mainWindows;
 const ipc = electron.ipcMain; 
 var HOST = '127.0.0.1';
 var PORT = 4999;
+var HOST2 = "127.0.0.1"
 var PORT2 = 6003;
 var Sound_soc;
 var jsdom = require("jsdom");
+var serverSocket;
 const ipcRenderer =  electron.ipcRenderer;
     app.on('ready',function(){
         mainWindows = new BrowserWindow({width:480,height:720,backgroundColor:'#eee',autoHideMenuBar:true,resizable:false});
@@ -41,7 +45,20 @@ const ipcRenderer =  electron.ipcRenderer;
         });
         ipc.on("Go__c",function(v1,v2){
             console.log(v1);   
-             
+            if(true){
+                //do_get_devices sev info;
+                
+
+                //OK---next
+                serverSocket = dgram.createSocket('udp4');
+                serverSocket.bind(v1);
+                serverSocket.on("message",function(msg,info){
+
+                });
+                //OK---Start emit;
+
+                //---------------
+            }             
         });       
     });
     
