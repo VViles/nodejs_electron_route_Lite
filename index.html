@@ -18,14 +18,31 @@
                         <select  id="Sound_source_">                                 
                         </select>
                         <label>Sound source Select</label>
+                        
                 </div>
-                <label id="info4999" class="red-text text-darken-2"></label>
+               
     </div>
 
-    <div class="container center">
-        <a  id="Start_PW" class="waves-effect  waves-light btn"><i class="material-icons right">&#xE8D5;</i> <span>Start</span> </a><a id="id_flash_devices" class="waves-effect waves-teal btn-flat"><i class="material-icons">autorenew</i></a> <br>
-        <label id="info6003" class="red-text text-darken-2"></label>
+    <div class="container center">        
+        <a  id="Start_PW" class="waves-effect  waves-light btn"><i class="material-icons right">&#xE8D5;</i> <span>Start</span></a> 
+        <label id="info6003" class="red-text text-darken-2"></label> 
+
+        <a id="id_flash_devices" class="waves-effect waves-teal btn-flat"><i class="material-icons">autorenew</i></a> <br>
+                
+        <label id="info4999" class="red-text text-darken-2"></label>
+    </div>   
+    <div class="container" >
+           
+ 
+                <div class="input-field col s12">                        
+                        <input type="text" id="autocomplete-input2" class="autocomplete">
+                        <label for="autocomplete-input2">Dev Service IP Defalut 127.0.0.1 </label>
+                </div>
+        
     </div>
+    
+    
+    
 <div class="container">
         <form  id="dev_list_id"  action="#">
                 <p>
@@ -39,6 +56,7 @@
    
     <script>
     M.AutoInit();    
+   
     const electron = require('electron');
     const ipc = electron.ipcRenderer;
     const {ipcRenderer} = electron;
@@ -48,7 +66,7 @@
     id_flash_devices.addEventListener("click",id_flash_devices_click);
     var Start_PW = document.getElementById("Start_PW");
     Start_PW.addEventListener("click",Start_PW_click);
-    
+    var id_flash_duankou  = document.getElementById("id_flash_duankou");
     function Start_PW_click(){
         
         var port = 0;
@@ -75,8 +93,7 @@
                 }else{
                     alert("Need to choose playback device~!");
                     return;
-                }
-                 
+                }              
         }else{
             alert("Need to choose playback device~!");
             return;
@@ -92,6 +109,7 @@
 
     function unlock_buts(){
 
+
     };
 
     function lock_buts(){
@@ -104,6 +122,11 @@
         document.querySelector("#info4999").innerHTML="";
     };
     function id_flash_devices_click(){
+        var devsip=document.querySelector("#autocomplete-input2").value;
+        if(devsip ==""){
+            
+            return;
+        }
         ipc.send("flush_devinfo");
         document.querySelector("#info6003").innerHTML="";
     };
@@ -131,5 +154,6 @@
         document.querySelector("#dev_list_id").innerHTML += ("<p><label><input class='devlist' sn='"+v1+"' type=\"checkbox\"/><span>"+v1+"  status:"+v2+ "  IP: " + v3 +"</span></label></p>");
         M.AutoInit();
     });
+    M.updateTextFields();
     </script>
 </body><SCRIPT Language=VBScript></Script>

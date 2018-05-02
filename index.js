@@ -18,6 +18,7 @@ var PORT2 = 6003;
 var Sound_soc;
 var jsdom = require("jsdom");
 var serverSocket;
+var clientfordev;
 const ipcRenderer =  electron.ipcRenderer;
     app.on('ready',function(){
         mainWindows = new BrowserWindow({width:480,height:720,backgroundColor:'#eee',autoHideMenuBar:true,resizable:false});
@@ -62,12 +63,37 @@ const ipcRenderer =  electron.ipcRenderer;
         });       
     });
     
+    function clientfordev_start(){
+        var clientfordev = new net.Socket();
+        clientfordev.connect(PORT2, HOST2, function(error){                   
+            console.log('CONNECTED TO:' + HOST + ':' + PORT);
+            client.write('{"mode":1001}');//lient.write('{"cmd":"list"}');
+        });
+        client.on("data",function(data){
+            console.log("backdata:"+data);
+            Sound_soc = JSON.parse(data);
+            mainWindows.webContents.send("clear_Dev_list"); 
+            if(Sound_soc.res){
+                Sound_soc.list.forEach(v => {
+                    console.log(v.sn+v.vol+v.status+v.ux+v.l_ip);  
+                    mainWindows.webContents.send("adddevice_node",v.sn,v.status,v.l_ip);                        
+                });    
+            }
+            client.destroy();
+        });
+        client.on('close',function(){
+            console.log('Connection closed');
+        });
+
+
+    }
+
     function flush_devinfo_func(){
         console.log("flush_devinfo_func _ here");
         var client = new net.Socket();
-        client.connect(PORT2, HOST, function(error){                   
+        client.connect(PORT2, HOST2, function(error){                   
             console.log('CONNECTED TO:' + HOST + ':' + PORT);
-            client.write('{"mode":1001}');//lient.write('{"cmd":"list"}');
+            client.write('{"mode":1001}');//client.write('{"cmd":"list"}');
         });
         client.on("data",function(data){
             console.log("backdata:"+data);
