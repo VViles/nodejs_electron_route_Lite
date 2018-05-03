@@ -15,10 +15,11 @@ var HOST = '127.0.0.1';
 var PORT = 4999;
 var HOST2 = "127.0.0.1"
 var PORT2 = 6003;
+var skyscraper_port = 6002;
 var Sound_soc;
 var jsdom = require("jsdom");
 var serverSocket;
-var clientfordev;
+var clientfordev,clientfordev_data;
 const ipcRenderer =  electron.ipcRenderer;
     app.on('ready',function(){
         mainWindows = new BrowserWindow({width:480,height:720,backgroundColor:'#eee',autoHideMenuBar:true,resizable:false});
@@ -36,10 +37,12 @@ const ipcRenderer =  electron.ipcRenderer;
         process.on('uncaughtException', (reason, p) => {
             console.log(reason);
             if(reason.code == "ECONNREFUSED"){
-                    if( reason.port == 4999 ){
+                    if( reason.port == PORT ){
                         mainWindows.webContents.send("Service4999:unline");
-                    }else if(reason.port == 6003){
+                    }else if(reason.port == PORT2){
                         mainWindows.webContents.send("Service6003:unline");     
+                    }else if(reason.port == skyscraper_port){
+                        mainWindows.webContents.send("Service6002:unline");    
                     }
             }
             console.error(reason, 'uncaughtException at Promise' );    
@@ -47,45 +50,106 @@ const ipcRenderer =  electron.ipcRenderer;
         ipc.on("Go__c",function(v1,v2){
             console.log(v1);   
             if(true){
-                //do_get_devices sev info;
-                
-
-                //OK---next
-                serverSocket = dgram.createSocket('udp4');
-                serverSocket.bind(v1);
-                serverSocket.on("message",function(msg,info){
-
+                //do_get_devices sev info;                
+                clientfordev_data = new net.Socket();   
+                clientfordev_data.connect(HOST2,skyscraper_port,function(error){
+                    console.log('CONNECTED TO:' + HOST + ':' + PORT);
+                    client.write('{"cmd":"PLAYLIST","ulevel":99,"plevel":2,"Umask":"test","Umagic":3,"snlist":['+v2+']}');
+                    /*
+                    ulevel   等级U  int 类型  1~999
+                    plevel   等级P   int 类型 1~9
+                    Umask    使用标记 string  max length 20	 
+                    Umagic   魔数 不重复 int	
+                    snlist   json数组[sn1,sn2,sn3,sn4,sn..]  期待响应的设备序列号 列表     
+                    eg:
+                        {
+                            "cmd":"PLAYLIST",
+                            "ulevel":99,
+                            "plevel":2,
+                            "Umask":"test",
+                            "Umagic":3,
+                            "snlist":[
+                                "34ffd7054352373951410243",
+                                "35ffd8054353343639611043"
+                            ]
+                        }               
+                    */
                 });
-                //OK---Start emit;
+                clientfordev_data.on("data",function(data){
+                    console.log("backdata:"+data);
+                    if(data.length  == 5){
+                         //do nothing here   
+                    }else if(data=="WELL"){
+                        //WELL now Create Dgram Listener and lets Mic Start emit Data;
+                        //OK---next
+                        serverSocket = dgram.createSocket('udp4');
+                        serverSocket.bind(v1);
+                        serverSocket.on("message",function(msg,info){
+                            clientfordev_data.write(msg);
+                        });
+                        //OK---Start emit;
+                        clientforMic_start();    
+                        //---------------
+                    }else if(data == "DISS"){
+                        clientfordev_data.destroy();   
+                        //emit Something error in Json;
+                        mainWindows.webContents.send("Devservice_JSONERROR");
+                    }else{
+                        //do nothing
+                    }      
+                    
+                });
+                clientfordev_data.on('close',function(){
+                    clientforMic_stop(); 
+                     
+                    console.log('Connection closed');
+                });
 
-                //---------------
+
+
+
+                
             }             
         });       
     });
     
-    function clientfordev_start(){
-        var clientfordev = new net.Socket();
-        clientfordev.connect(PORT2, HOST2, function(error){                   
+    function clientforMic_start(){
+        var clientforStart = new net.Socket();
+        clientforStart.connect(PORT, HOST, function(error){                   
             console.log('CONNECTED TO:' + HOST + ':' + PORT);
-            client.write('{"mode":1001}');//lient.write('{"cmd":"list"}');
+            client.write('{"mode":3007}'); //'{"cmd":"START"}'
         });
         client.on("data",function(data){
             console.log("backdata:"+data);
-            Sound_soc = JSON.parse(data);
-            mainWindows.webContents.send("clear_Dev_list"); 
+            Sound_soc = JSON.parse(data);            
             if(Sound_soc.res){
-                Sound_soc.list.forEach(v => {
-                    console.log(v.sn+v.vol+v.status+v.ux+v.l_ip);  
-                    mainWindows.webContents.send("adddevice_node",v.sn,v.status,v.l_ip);                        
-                });    
+                console.log("Start already");       
             }
             client.destroy();
         });
         client.on('close',function(){
             console.log('Connection closed');
         });
-
-
+    }
+    
+    function clientforMic_stop(){
+        var clientforStart = new net.Socket();
+        clientforStart.connect(PORT, HOST, function(error){                   
+            console.log('CONNECTED TO:' + HOST + ':' + PORT);
+            client.write('{"mode":3008}'); //'{"cmd":"STOP"}'
+        });
+        client.on("data",function(data){
+            console.log("backdata:"+data);
+            Sound_soc = JSON.parse(data);
+            mainWindows.webContents.send("clear_Dev_list"); 
+            if(Sound_soc.res){
+                console.log("Stoped Over");                
+            }
+            client.destroy();
+        });
+        client.on('close',function(){
+            console.log('Connection closed');
+        });
     }
 
     function flush_devinfo_func(){

@@ -79,15 +79,19 @@
             return;
         }
         var sl  =  document.getElementsByClassName("devlist");
+        var strsnlist="";
         if(sl.length > 0 ){
                 for( var i=0 ; i < sl.length ; i++ ){
                         if(sl[i].checked == true ){
                             list_sn.List.push(sl[i].getAttribute("sn")); 
+                            strsnlist+="\""+sl[i].getAttribute("sn")+"\""+",";
                         }                      
                 }
                 
+                
                 if(list_sn.List.length > 0){
-                    ipc.send("Go__c",port,list_sn);    
+                    strsnlist=strsnlistTrimEnd(',');
+                    ipc.send("Go__c",port,strsnlist);    
                     //lock_buttuns;
                     lock_buts();
                 }else{
@@ -145,6 +149,10 @@
     });
     ipcRenderer.on("Service6003:unline",function(){
         document.querySelector("#info6003").innerHTML="Error  :  Devices service Unline";
+    });
+    ipcRenderer.on("Service6003:unline",function(){
+        alert("Device Service unReachable");
+        //document.querySelector("#info6002").innerHTML="Error  :  Devices service Unline";
     });
     ipcRenderer.on("clear_Dev_list",function(){
        var dev_list_id = document.querySelector("#dev_list_id");
