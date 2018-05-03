@@ -90,7 +90,7 @@
                 
                 
                 if(list_sn.List.length > 0){
-                    strsnlist=strsnlistTrimEnd(',');
+                    strsnlist=strsnlist.substring(0,strsnlist.length-1);
                     ipc.send("Go__c",port,strsnlist);    
                     //lock_buttuns;
                     lock_buts();

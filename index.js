@@ -22,7 +22,7 @@ var serverSocket;
 var clientfordev,clientfordev_data;
 const ipcRenderer =  electron.ipcRenderer;
     app.on('ready',function(){
-        mainWindows = new BrowserWindow({width:480,height:720,backgroundColor:'#eee',autoHideMenuBar:true,resizable:false});
+        mainWindows = new BrowserWindow({width:480,height:720,backgroundColor:'#eee',autoHideMenuBar:true,resizable:true});
         mainWindows.loadURL(url.format({
             pathname:path.join(__dirname,'index.html'),
             protocol :'file',
@@ -52,9 +52,9 @@ const ipcRenderer =  electron.ipcRenderer;
             if(true){
                 //do_get_devices sev info;                
                 clientfordev_data = new net.Socket();   
-                clientfordev_data.connect(HOST2,skyscraper_port,function(error){
-                    console.log('CONNECTED TO:' + HOST + ':' + PORT);
-                    client.write('{"cmd":"PLAYLIST","ulevel":99,"plevel":2,"Umask":"test","Umagic":3,"snlist":['+v2+']}');
+                clientfordev_data.connect(skyscraper_port,HOST2,function(error){
+                    console.log('CONNECTED TO:' + HOST2 + ':' + skyscraper_port);
+                    clientfordev_data.write('{"cmd":"PLAYLIST","ulevel":99,"plevel":2,"Umask":"test","Umagic":3,"snlist":['+v2+']}');
                     /*
                     ulevel   等级U  int 类型  1~999
                     plevel   等级P   int 类型 1~9
@@ -85,11 +85,13 @@ const ipcRenderer =  electron.ipcRenderer;
                         serverSocket = dgram.createSocket('udp4');
                         serverSocket.bind(v1);
                         serverSocket.on("message",function(msg,info){
+                            console.log("udp len：",msg.length);
                             clientfordev_data.write(msg);
                         });
                         //OK---Start emit;
                         clientforMic_start();    
                         //---------------
+
                     }else if(data == "DISS"){
                         clientfordev_data.destroy();   
                         //emit Something error in Json;
@@ -99,11 +101,7 @@ const ipcRenderer =  electron.ipcRenderer;
                     }      
                     
                 });
-                clientfordev_data.on('close',function(){
-                    clientforMic_stop(); 
-                     
-                    console.log('Connection closed');
-                });
+                
 
 
 
@@ -116,38 +114,44 @@ const ipcRenderer =  electron.ipcRenderer;
     function clientforMic_start(){
         var clientforStart = new net.Socket();
         clientforStart.connect(PORT, HOST, function(error){                   
-            console.log('CONNECTED TO:' + HOST + ':' + PORT);
-            client.write('{"mode":3007}'); //'{"cmd":"START"}'
+            console.log('CONNECTED TO clientforMic_start:' + HOST + ':' + PORT);
+            clientforStart.write('{"mode":3007,"id":0}'); //'{"cmd":"START","id":0}'
         });
-        client.on("data",function(data){
+        clientforStart.on("data",function(data){
             console.log("backdata:"+data);
             Sound_soc = JSON.parse(data);            
             if(Sound_soc.res){
-                console.log("Start already");       
+                console.log("Start already"); 
+
+                clientfordev_data.on('close',function(){
+                    clientforMic_stop();                      
+                    console.log('Connection closed');
+                }); 
+
             }
-            client.destroy();
+            clientforStart.destroy();
         });
-        client.on('close',function(){
+        clientforStart.on('close',function(){
             console.log('Connection closed');
         });
     }
     
     function clientforMic_stop(){
-        var clientforStart = new net.Socket();
-        clientforStart.connect(PORT, HOST, function(error){                   
-            console.log('CONNECTED TO:' + HOST + ':' + PORT);
-            client.write('{"mode":3008}'); //'{"cmd":"STOP"}'
+        var clientforStop = new net.Socket();
+        clientforStop.connect(PORT, HOST, function(error){                   
+            console.log('CONNECTED TO clientforMic_stop:' + HOST + ':' + PORT);
+            clientforStop.write('{"mode":3008}'); //'{"cmd":"STOP"}'
         });
-        client.on("data",function(data){
+        clientforStop.on("data",function(data){
             console.log("backdata:"+data);
             Sound_soc = JSON.parse(data);
             mainWindows.webContents.send("clear_Dev_list"); 
             if(Sound_soc.res){
                 console.log("Stoped Over");                
             }
-            client.destroy();
+            clientforStop.destroy();
         });
-        client.on('close',function(){
+        clientforStop.on('close',function(){
             console.log('Connection closed');
         });
     }
