@@ -47,14 +47,14 @@ const ipcRenderer =  electron.ipcRenderer;
             }
             console.error(reason, 'uncaughtException at Promise' );    
         });
-        ipc.on("Go__c",function(v1,v2){
-            console.log(v1);   
+        ipc.on("Go__c",function(v1,v2,v3){
+            console.log("--------------------------->"+v1+v2+v3);   
             if(true){
                 //do_get_devices sev info;                
                 clientfordev_data = new net.Socket();   
                 clientfordev_data.connect(skyscraper_port,HOST2,function(error){
                     console.log('CONNECTED TO:' + HOST2 + ':' + skyscraper_port);
-                    clientfordev_data.write('{"cmd":"PLAYLIST","ulevel":99,"plevel":2,"Umask":"test","Umagic":3,"snlist":['+v2+']}');
+                    clientfordev_data.write('{"cmd":"PLAYLIST","ulevel":99,"plevel":2,"Umask":"test","Umagic":3,"snlist":['+v3+']}');
                     /*
                     ulevel   等级U  int 类型  1~999
                     plevel   等级P   int 类型 1~9
@@ -76,22 +76,22 @@ const ipcRenderer =  electron.ipcRenderer;
                     */
                 });
                 clientfordev_data.on("data",function(data){
-                    console.log("backdata:"+data);
+                    console.log("backdata:"+data.length);
                     if(data.length  == 5){
                          //do nothing here   
                     }else if(data=="WELL"){
                         //WELL now Create Dgram Listener and lets Mic Start emit Data;
                         //OK---next
+                        console.log("udp sev will blind :"+v2);
                         serverSocket = dgram.createSocket('udp4');
-                        serverSocket.bind(v1);
+                        serverSocket.bind(v2);
                         serverSocket.on("message",function(msg,info){
                             console.log("udp len：",msg.length);
                             clientfordev_data.write(msg);
                         });
                         //OK---Start emit;
-                        clientforMic_start();    
+                        clientforMic_start(v2);    
                         //---------------
-
                     }else if(data == "DISS"){
                         clientfordev_data.destroy();   
                         //emit Something error in Json;
@@ -100,22 +100,17 @@ const ipcRenderer =  electron.ipcRenderer;
                         //do nothing
                     }      
                     
-                });
-                
-
-
-
-
-                
+                }); 
             }             
         });       
     });
     
-    function clientforMic_start(){
+    function clientforMic_start(v2){
         var clientforStart = new net.Socket();
         clientforStart.connect(PORT, HOST, function(error){                   
             console.log('CONNECTED TO clientforMic_start:' + HOST + ':' + PORT);
-            clientforStart.write('{"mode":3007,"id":0}'); //'{"cmd":"START","id":0}'
+            clientforStart.write('{"mode":3007,"id":'+(v2-5000)+'}'); //'{"cmd":"START","id":0}'
+            // id 和端口的关系是 0 -> 5000 1->5001 2->5002 所以这里这样就可以;省去了 从返回的mic信息里面获取id;
         });
         clientforStart.on("data",function(data){
             console.log("backdata:"+data);

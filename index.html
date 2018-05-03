@@ -91,6 +91,7 @@
                 
                 if(list_sn.List.length > 0){
                     strsnlist=strsnlist.substring(0,strsnlist.length-1);
+                    console.log("port:"+port);
                     ipc.send("Go__c",port,strsnlist);    
                     //lock_buttuns;
                     lock_buts();
